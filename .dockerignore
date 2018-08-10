@@ -1,2 +1,5 @@
-environment
+venv
+__pycache__
+.git
+.git*
 bin
