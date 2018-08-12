@@ -1,4 +1,5 @@
 from TemperatureHumidity.TemperatureHumidity import read_value
+from HumidexTemperature.HumidexTemperature import dewpoint, humidex
 from flask_caching import Cache
 from datetime import datetime
 from flask import Flask
@@ -18,15 +19,40 @@ cache.init_app(app)
 @app.route("/temperaturehumidity")
 @cache.cached(timeout=cache_time)
 def temperaturehumidity():
-    resp = {}
     data = read_temperature()
     addTimestamp(data)
     resp = jsonify(data)
     resp.status_code = 200
-    #    data.pop('timestamp')
     return resp
 
+
+@app.route("/humidex")
+def humidextemperature():
+    source_data = read_temperature()
+    humidx = humidex(float(source_data['temperature']), float(source_data['humidity']))
+    data = {"temperature": humidx, "type": "humidex"}
+    addTimestamp(data)
+    logging.debug(data)
+    resp = jsonify(data)
+    resp.status_code = 200
+    return resp
+
+
+@app.route("/dewpoint")
+def dewpointtemperature():
+    source_data = read_temperature()
+    dewpt = dewpoint(float(source_data['temperature']), float(source_data['humidity']))
+    data = {"temperature": dewpt, "type": "dewpoint"}
+    addTimestamp(data)
+    logging.debug(data)
+    resp = jsonify(data)
+    resp.status_code = 200
+    return resp
+
+
+@cache.cached(timeout=cache_time)
 def read_temperature():
+    logging.debug("read temperature from sensor")
     data1, data2 = read_value('11', 4)
     data = {"temperature": "{}".format(data1), "humidity": "{}".format(data2)}
     logging.debug(json.dumps(data))
