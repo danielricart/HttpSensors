@@ -27,6 +27,7 @@ def temperaturehumidity():
 
 
 @app.route("/humidex")
+@cache.cached(timeout=cache_time)
 def humidextemperature():
     source_data = read_temperature()
     humidx = humidex(float(source_data['temperature']), float(source_data['humidity']))
@@ -39,6 +40,7 @@ def humidextemperature():
 
 
 @app.route("/dewpoint")
+@cache.cached(timeout=cache_time)
 def dewpointtemperature():
     source_data = read_temperature()
     dewpt = dewpoint(float(source_data['temperature']), float(source_data['humidity']))
@@ -50,7 +52,6 @@ def dewpointtemperature():
     return resp
 
 
-@cache.cached(timeout=cache_time)
 def read_temperature():
     logging.debug("read temperature from sensor")
     data1, data2 = read_value('11', 4)
